@@ -100,18 +100,6 @@
         },
 
         methods: {
-          edit(fruit) {
-            this.form.name = fruit.name;
-            this.form.stock = parseInt(fruit.stock);
-            this.form.id = fruit.id;
-          },
-          async remove(fruit) {
-            await fetch(`/api/fruits/${fruit.id}`, {
-              method: 'DELETE',
-            })
-              .then(this._success)
-              .catch(this._error);
-          },
           async _refreshPageData() {
             const result = await fetch('/api/fruits', {
               method: 'GET',
