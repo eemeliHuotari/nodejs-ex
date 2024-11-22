@@ -101,7 +101,7 @@
 
         methods: {
           async _refreshPageData() {
-            const result = await fetch('/api/fruits', {
+            const result = await fetch('/api/signal', {
               method: 'GET',
             });
             if (result.ok) {
