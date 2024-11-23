@@ -74,7 +74,7 @@
       document.getElementById('longitude').textContent = `Longitude: ${coordinates.longitude}`
       document.getElementById('latitude').textContent = `Latitude: ${coordinates.latitude}`
       document.getElementById('speed').textContent = `Speed: ${coordinates.speed}`
-      document.getElementById('signalText').textContent = `${coordinates.signalStrength}`
+      document.getElementById('signalText').textContent = `${coordinates.signal_strength}`
       var map = new ol.Map({
       target: 'demoMap',
       layers: [
