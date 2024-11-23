@@ -1,75 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sensor Data</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css" />
-  <style>
-    /* Some basic styling */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    table, th, td {
-      border: 1px solid black;
-    }
-    th, td {
-      padding: 8px;
-      text-align: left;
-    }
-  </style>
-</head>
-<body>
-  <h1>Sensor Data</h1>
-  <p>This table displays sensor data including signal strength, longitude, latitude, and speed.</p>
-  
-  <table id="sensorDataTable">
-    <thead>
-      <tr>
-        <th>Signal Strength</th>
-        <th>Longitude</th>
-        <th>Latitude</th>
-        <th>Speed</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Data rows will be dynamically inserted here -->
-    </tbody>
-  </table>
-
-  <script>
-    async function fetchSensorData() {
-      try {
-        const response = await fetch('/fruits');
-        if (response.ok) {
-          const data = await response.json();
-          displaySensorData(data);
-        } else {
-          console.error('Failed to fetch data:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Fruit Stock Management</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"
+    />
+    <style>
+      input[type='number'] {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        -webkit-transition: 0.5s;
+        transition: 0.5s;
+        outline: 0;
+        font-family: 'Open Sans', serif;
       }
-    }
+      .data-table {
+        margin-top: 20px;
+      }
+      .data-table th, .data-table td {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+      }
+      </style>
+  </head>
+  <body>
+    <div class="container" id="app">
+      <h1>Node.js InfluxDB Query Results</h1>
 
-    function displaySensorData(data) {
-      const tableBody = document.querySelector('#sensorDataTable tbody');
-      tableBody.innerHTML = '';
+      <p>
+        This application demonstrates how a Node.js application can query an
+        InfluxDB and display data such as <em>signal strength</em>, <em>longitude</em>, 
+        <em>latitude</em>, and <em>speed</em>.
+      </p>
 
-      data.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.signal_strength}</td>
-          <td>${item.longitude}</td>
-          <td>${item.latitude}</td>
-          <td>${item.speed}</td>
-        `;
-        tableBody.appendChild(row);
+      <h3>Sensor Data</h3>
+
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Signal Strength</th>
+              <th>Longitude</th>
+              <th>Latitude</th>
+              <th>Speed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="data in sensorData" :key="data.time">
+              <td>{{ data.signal_strength }}</td>
+              <td>{{ data.longitude }}</td>
+              <td>{{ data.latitude }}</td>
+              <td>{{ data.speed }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.10/vue.min.js"
+      integrity="sha512-H8u5mlZT1FD7MRlnUsODppkKyk+VEiCmncej8yZW1k/wUT90OQon0F9DSf/2Qh+7L/5UHd+xTLrMszjHEZc2BA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <script>
+      const app = new Vue({
+        el: '#app',
+        data: {
+          sensorData: [],
+        },
+        methods: {
+          async _refreshSensorData() {
+            try {
+              const result = await fetch('/api/fruits');
+              if (result.ok) {
+                const resultData = await result.json();
+                this.sensorData = resultData;
+              } else {
+                console.error('Error fetching data:', result.statusText);
+                }
+            } catch (err) {
+              console.error('Failed to fetch sensor data:', err);
+            }
+          },
+        },
+        mounted: function () {
+          this._refreshSensorData();
+          },
       });
-    }
-
-    window.onload = fetchSensorData;
-  </script>
-</body>
+    </script>
+  </body>
 </html>
