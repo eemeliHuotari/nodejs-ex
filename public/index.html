@@ -52,14 +52,14 @@
         <div class="row" id="signalstrength">
           Signal Strength: 
           <span id="signalText"></span>
-          <img id="signalImage" src="Icons/signal_empty.png" alt="Signal Strength" width="30" height="30">
+          <img id="signalImage" src="../Icons/signal_empty.png" alt="Signal Strength" width="30" height="30">
         </div>
       </div>
     </div>
   </section>
 
   <script>
-    const images = ["nodejs-ex/Icons/signal_empty.png", "nodejs-ex/Icons/signal_1.png", "nodejs-ex/Icons/signal_2.png", "nodejs-ex/Icons/signal_3.png", "nodejs-ex/Icons/signal_4.png"];
+    const images = ["../Icons/signal_empty.png", "../Icons/signal_1.png", "../Icons/signal_2.png", "../Icons/signal_3.png", "../Icons/signal_4.png"];
     let currentImageIndex = 0;
     function changeImage() {
       document.getElementById("signalImage").src = images[currentImageIndex];
@@ -93,7 +93,7 @@
         info: {
           title: "Home",
           description: document.getElementById(popup_content),
-          imageURL: 'nodejs-ex/Icons/marker_icon.png'
+          imageURL: '../Icons/marker_icon.png'
         }
       });
 
@@ -101,7 +101,7 @@
     var iconStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
-        src: 'nodejs-ex/Icons/marker_icon.png',
+        src: '../Icons/marker_icon.png',
         scale: 0.075
       })
     });
