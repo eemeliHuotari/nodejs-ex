@@ -1,103 +1,148 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Fruit Stock Management</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"
-    />
-    <style>
-      input[type='number'] {
-        width: 100%;
-        padding: 12px 20px;
-        margin: 8px 0;
-        display: inline-block;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-        -webkit-transition: 0.5s;
-        transition: 0.5s;
-        outline: 0;
-        font-family: 'Open Sans', serif;
-      }
-      .data-table {
-        margin-top: 20px;
-      }
-      .data-table th,
-      .data-table td {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container" id="app">
-      <h1>Node.js InfluxDB Query Results</h1>
-
-      <p>
-        This application demonstrates how a Node.js application can query an
-        InfluxDB and display data such as <em>signal strength</em>,
-        <em>longitude</em>, <em>latitude</em>, and <em>speed</em>.
-      </p>
-
-      <h3>Sensor Data</h3>
-
-      <div class="data-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Signal Strength</th>
-              <th>Longitude</th>
-              <th>Latitude</th>
-              <th>Speed</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(data, index) in sensorData" :key="index">
-              <td>{{ data.signal_strength }}</td>
-              <td>{{ data.longitude }}</td>
-              <td>{{ data.latitude }}</td>
-              <td>{{ data.speed }}</td>
-            </tr>
-          </tbody>
-        </table>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.2.1/ol.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
+    #demoMap {
+      height: 100%;
+      width: 100%;
+    }
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: white;
+      padding: 20px;
+      border: 1px solid #ccc;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 1000;
+      width: 300px;
+      height: 100%;
+    }
+    #popup_content .row {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <section class="container">
+    <div id="demoMap"></div>
+    <div id="popup" class="popup" style="display: none;">
+      <h3>Data</h3>
+      <p id="popupText">This is the marker's info text!</p>
+      <div id="popup_content">
+        <div class="row" id="coordinatesTuple">Coordinates: </div>
+        <div class="row" id="speed">Speed: </div>
+        <div class="row" id="signalstrength">
+          Signal Strength: 
+          <span id="signalText"></span>
+          <img id="signalImage" src="Icons/signal_empty.png" alt="Signal Strength" width="30" height="30">
+        </div>
       </div>
     </div>
+  </section>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.10/vue.min.js"
-      integrity="sha512-H8u5mlZT1FD7MRlnUsODppkKyk+VEiCmncej8yZW1k/wUT90OQon0F9DSf/2Qh+7L/5UHd+xTLrMszjHEZc2BA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-
-    <script>
-      const app = new Vue({
-        el: '#app',
-        data: {
-          sensorData: [],
-        },
-        methods: {
-          async _refreshSensorData() {
-            try {
-              const response = await fetch('/api');
-              if (!response.ok) {
-                console.error('Error fetching data:', response.statusText);
-                return;
-              }
-              const data = await response.json();
-              this.sensorData = data;
-            } catch (error) {
-              console.error('Failed to fetch sensor data:', error);
-            }
-          },
-        },
-        mounted() {
-          this._refreshSensorData();
-          setInterval(this._refreshSensorData, 10000);
-        },
+  <script>
+    const images = ["Icons/signal_empty.png", "Icons/signal_1.png", "Icons/signal_2.png", "Icons/signal_3.png", "Icons/signal_4.png"];
+    let currentImageIndex = 0;
+    function changeImage() {
+      document.getElementById("signalImage").src = images[currentImageIndex];
+      currentImageIndex = (currentImageIndex + 1) % images.length;
+    }
+    setInterval(changeImage, 1000);
+  </script>
+  <script>
+    mainRead();
+    async function mainRead() {
+      const coordinates = await getData();
+      document.getElementById('coordinatesTuple').textContent = `Coordinates: ${coordinates.coordinates[0]}, ${coordinates.coordinates[1]}`;
+      document.getElementById('speed').textContent = `Speed: ${coordinates.speed}`
+      document.getElementById('signalText').textContent = `${coordinates.signalStrength}`
+      var map = new ol.Map({
+      target: 'demoMap',
+      layers: [
+        new ol.layer.Tile({
+          source: new ol.source.OSM()
+        })
+      ],
+      view: new ol.View({
+        center: ol.proj.fromLonLat([coordinates.coordinates[0], coordinates.coordinates[1]]),
+        zoom: 14,
+        maxZoom: 20
+      })
+    });
+       var marker = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([coordinates.coordinates[0], coordinates.coordinates[1]])),
+        info: {
+          title: "Home",
+          description: document.getElementById(popup_content),
+          imageURL: 'Icons/marker_icon.png'
+        }
       });
-    </script>
-  </body>
+
+
+    var iconStyle = new ol.style.Style({
+      image: new ol.style.Icon({
+        anchor: [0.5, 1],
+        src: 'Icons/marker_icon.png',
+        scale: 0.075
+      })
+    });
+
+
+    marker.setStyle(iconStyle);
+
+    var vectorSource = new ol.source.Vector({
+      features: [marker]
+    });
+    var vectorLayer = new ol.layer.Vector({
+      source: vectorSource
+    });
+    map.addLayer(vectorLayer);
+
+    var popup = document.getElementById('popup');
+    var popupText = document.getElementById('popupText');
+
+    map.on('click', function(evt) {
+      var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+        return feature;
+      });
+
+      if (feature === marker) {
+        var markerInfo = feature.get('info');
+        popupText.textContent = markerInfo.description;
+        popup.style.display = 'block';
+
+        var coordinates = feature.getGeometry().getCoordinates();
+        map.getView().setCenter(coordinates);
+        map.getView().setZoom(16);
+
+      } else {
+        popup.style.display = 'none';
+      }
+    });
+      }
+    async function getData() {
+      const response = await fetch("/api");
+      const data = await response.json();
+      return data;
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
+</body>
 </html>
