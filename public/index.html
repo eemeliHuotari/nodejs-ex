@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Fruit Stock Management</title>
+    <title>Sensor Data Display</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"
@@ -24,8 +24,7 @@
       .data-table {
         margin-top: 20px;
       }
-      .data-table th,
-      .data-table td {
+      .data-table th, .data-table td {
         padding: 8px 12px;
         border: 1px solid #ddd;
       }
@@ -33,18 +32,16 @@
   </head>
   <body>
     <div class="container" id="app">
-      <h1>Node.js InfluxDB Query Results</h1>
-
+      <h1>Sensor Data</h1>
       <p>
-        This application demonstrates how a Node.js application can query an
-        InfluxDB and display data such as <em>signal strength</em>,
-        <em>longitude</em>, <em>latitude</em>, and <em>speed</em>.
+        This application demonstrates how to query InfluxDB and display
+        sensor data like <em>signal strength</em>, <em>longitude</em>, <em>latitude</em>, and <em>speed</em>.
       </p>
 
-      <h3>Sensor Data</h3>
+      <h3>Sensor Data Table</h3>
 
       <div class="data-table">
-        <table>
+        <table id="sensorDataTable">
           <thead>
             <tr>
               <th>Signal Strength</th>
@@ -54,28 +51,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(data, index) in sensorData" :key="index">
-              <td>{{ data.signal_strength }}</td>
-              <td>{{ data.longitude }}</td>
-              <td>{{ data.latitude }}</td>
-              <td>{{ data.speed }}</td>
-            </tr>
+            <!-- Data rows will be dynamically inserted here -->
           </tbody>
         </table>
       </div>
     </div>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.10/vue.min.js"
-      integrity="sha512-H8u5mlZT1FD7MRlnUsODppkKyk+VEiCmncej8yZW1k/wUT90OQon0F9DSf/2Qh+7L/5UHd+xTLrMszjHEZc2BA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-
     <script>
-      async fetchSensorData() {
+      async function fetchSensorData() {
         try {
-          const response = await fetch('api/fruits');
+          const response = await fetch('/fruits');
           if (response.ok) {
             const data = await response.json();
             displaySensorData(data);
@@ -86,19 +71,25 @@
           console.error('Error fetching data:', error);
         }
       }
+
+     
       function displaySensorData(data) {
         const tableBody = document.querySelector('#sensorDataTable tbody');
         tableBody.innerHTML = '';
 
+      
         data.forEach((item) => {
           const row = document.createElement('tr');
 
+         
           row.innerHTML = `
             <td>${item.signal_strength}</td>
             <td>${item.longitude}</td>
             <td>${item.latitude}</td>
             <td>${item.speed}</td>
           `;
+
+          
           tableBody.appendChild(row);
         });
       }
