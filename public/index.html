@@ -59,23 +59,45 @@
   </section>
 
   <script>
-    const images = ["Icons/signal_empty.png", "Icons/signal_1.png", "Icons/signal_2.png", "Icons/signal_3.png", "Icons/signal_4.png"];
-    let currentImageIndex = 0;
-    function changeImage() {
-      document.getElementById("signalImage").src = images[currentImageIndex];
-      currentImageIndex = (currentImageIndex + 1) % images.length;
-    }
-    setInterval(changeImage, 1000);
-  </script>
-  <script>
-    mainRead();
-    async function mainRead() {
-      const coordinates = await getData();
-      document.getElementById('longitude').textContent = `Longitude: ${coordinates[coordinates.length - 1].longitude}`
-      document.getElementById('latitude').textContent = `Latitude: ${coordinates[coordinates.length - 1].latitude}`
-      document.getElementById('speed').textContent = `Speed: ${coordinates[coordinates.length - 1].speed}`
-      document.getElementById('signalText').textContent = `${coordinates[coordinates.length - 1].signal_strength}`
-      var map = new ol.Map({
+  const images = [
+    "Icons/signal_empty.png",
+    "Icons/signal_1.png",
+    "Icons/signal_2.png",
+    "Icons/signal_3.png",
+    "Icons/signal_4.png"
+  ];
+
+  function getSignalImageIndex(signalStrength) {
+    if (signalStrength < 1) return 0;
+    if (signalStrength >= 1 && signalStrength < 5) return 1;
+    if (signalStrength >= 5 && signalStrength < 10) return 2;
+    if (signalStrength >= 10 && signalStrength < 15) return 3;
+    return 4;
+  }
+
+  async function mainRead() {
+    const coordinates = await getData();
+    const latestData = coordinates[coordinates.length - 1];
+
+    document.getElementById('longitude').textContent = `Longitude: ${latestData.longitude}`;
+    document.getElementById('latitude').textContent = `Latitude: ${latestData.latitude}`;
+    document.getElementById('speed').textContent = `Speed: ${latestData.speed}`;
+    document.getElementById('signalText').textContent = `${latestData.signal_strength}`;
+
+    const signalImageIndex = getSignalImageIndex(latestData.signal_strength);
+    document.getElementById('signalImage').src = images[signalImageIndex];
+
+    updateMap(latestData.longitude, latestData.latitude);
+  }
+
+  async function getData() {
+    const response = await fetch("/api");
+    const data = await response.json();
+    return data;
+  }
+
+  function updateMap(longitude, latitude) {
+    const map = new ol.Map({
       target: 'demoMap',
       layers: [
         new ol.layer.Tile({
@@ -83,22 +105,17 @@
         })
       ],
       view: new ol.View({
-        center: ol.proj.fromLonLat([coordinates[coordinates.length - 1].longitude, coordinates[coordinates.length - 1].latitude]),
+        center: ol.proj.fromLonLat([longitude, latitude]),
         zoom: 14,
         maxZoom: 20
       })
     });
-       var marker = new ol.Feature({
-        geometry: new ol.geom.Point(ol.proj.fromLonLat([coordinates[coordinates.length - 1].longitude, coordinates[coordinates.length - 1].latitude])),
-        info: {
-          title: "Home",
-          description: document.getElementById(popup_content),
-          imageURL: 'Icons/marker_icon.png'
-        }
-      });
 
+    const marker = new ol.Feature({
+      geometry: new ol.geom.Point(ol.proj.fromLonLat([longitude, latitude]))
+    });
 
-    var iconStyle = new ol.style.Style({
+    const iconStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         src: 'Icons/marker_icon.png',
@@ -106,45 +123,20 @@
       })
     });
 
-
     marker.setStyle(iconStyle);
 
-    var vectorSource = new ol.source.Vector({
+    const vectorSource = new ol.source.Vector({
       features: [marker]
     });
-    var vectorLayer = new ol.layer.Vector({
+
+    const vectorLayer = new ol.layer.Vector({
       source: vectorSource
     });
+
     map.addLayer(vectorLayer);
+  }
 
-    var popup = document.getElementById('popup');
-    var popupText = document.getElementById('popupText');
-
-    map.on('click', function(evt) {
-      var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
-        return feature;
-      });
-
-      if (feature === marker) {
-        var markerInfo = feature.get('info');
-        popupText.textContent = markerInfo.description;
-        popup.style.display = 'block';
-
-        var coordinates = feature.getGeometry().getCoordinates();
-        map.getView().setCenter(coordinates);
-        map.getView().setZoom(16);
-
-      } else {
-        popup.style.display = 'none';
-      }
-    });
-      }
-    async function getData() {
-      const response = await fetch("/api");
-      const data = await response.json();
-      return data;
-    }
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
-</body>
+  mainRead();
+  setInterval(mainRead, 10000);
+</script>
 </html>
