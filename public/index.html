@@ -73,31 +73,36 @@
     ></script>
 
     <script>
-      const app = new Vue({
-        el: '#app',
-        data: {
-          sensorData: [],
-        },
-        methods: {
-          async _refreshSensorData() {
-            try {
-              const response = await fetch('/api/fruits');
-              if (!response.ok) {
-                console.error('Error fetching data:', response.statusText);
-                return;
-              }
-              const data = await response.json();
-              this.sensorData = data;
-            } catch (error) {
-              console.error('Failed to fetch sensor data:', error);
-            }
-          },
-        },
-        mounted() {
-          this._refreshSensorData();
-          setInterval(this._refreshSensorData, 10000);
-        },
-      });
+      async fetchSensorData() {
+        try {
+          const response = await fetch('api/fruits');
+          if (response.ok) {
+            const data = await response.json();
+            displaySensorData(data);
+          } else {
+            console.error('Failed to fetch data:', response.statusText);
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      }
+      function displaySensorData(data) {
+        const tableBody = document.querySelector('#sensorDataTable tbody');
+        tableBody.innerHTML = '';
+
+        data.forEach((item) => {
+          const row = document.createElement('tr');
+
+          row.innerHTML = `
+            <td>${item.signal_strength}</td>
+            <td>${item.longitude}</td>
+            <td>${item.latitude}</td>
+            <td>${item.speed}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+      window.onload = fetchSensorData;
     </script>
   </body>
 </html>
