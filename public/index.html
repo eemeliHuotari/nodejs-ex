@@ -76,26 +76,26 @@
       const app = new Vue({
         el: '#app',
         data: {
-          sensorData: [], // Array to hold queried sensor data
+          sensorData: [],
         },
         methods: {
           async _refreshSensorData() {
             try {
-              const response = await fetch('/api/fruits'); // Fetch data from API
+              const response = await fetch('/api/fruits');
               if (!response.ok) {
                 console.error('Error fetching data:', response.statusText);
                 return;
               }
-              const data = await response.json(); // Parse the JSON response
-              this.sensorData = data; // Assign data to Vue's `sensorData`
+              const data = await response.json();
+              this.sensorData = data;
             } catch (error) {
               console.error('Failed to fetch sensor data:', error);
             }
           },
         },
         mounted() {
-          this._refreshSensorData(); // Automatically fetch data when the component mounts
-          setInterval(this._refreshSensorData, 10000); // Refresh data every 10 seconds
+          this._refreshSensorData();
+          setInterval(this._refreshSensorData, 10000);
         },
       });
     </script>
