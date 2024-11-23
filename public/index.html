@@ -22,9 +22,9 @@
       width: 100%;
     }
     .popup {
-      position: fixed;
-      top: 0;
-      left: 0;
+      position: absolute;
+      top: 10px;
+      left: 10px;
       background-color: white;
       padding: 20px;
       border: 1px solid #ccc;
@@ -32,7 +32,6 @@
       display: none;
       z-index: 1000;
       width: 300px;
-      height: 100%;
     }
     #popup_content .row {
       margin-top: 10px;
@@ -91,6 +90,7 @@
       document.getElementById('signalImage').src = images[signalImageIndex];
 
       updateMap(latestData.longitude, latestData.latitude);
+      addMarkerClickListener(latestData); // Add marker click listener with updated data
     }
 
     function updateMap(longitude, latitude) {
@@ -136,6 +136,29 @@
         marker.getGeometry().setCoordinates(ol.proj.fromLonLat([longitude, latitude]));
         map.getView().setCenter(ol.proj.fromLonLat([longitude, latitude]));
       }
+    }
+
+    function addMarkerClickListener(data) {
+      const popup = document.getElementById('popup');
+      const popupText = document.getElementById('popupText');
+
+      map.on('click', function (evt) {
+        const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+          return feature;
+        });
+
+        if (feature === marker) {
+          popupText.textContent = `Signal Strength: ${data.signal_strength}`;
+          popup.style.display = 'block';
+
+          document.getElementById('longitude').textContent = `Longitude: ${data.longitude}`;
+          document.getElementById('latitude').textContent = `Latitude: ${data.latitude}`;
+          document.getElementById('speed').textContent = `Speed: ${data.speed}`;
+          document.getElementById('signalText').textContent = `${data.signal_strength}`;
+        } else {
+          popup.style.display = 'none';
+        }
+      });
     }
 
     async function getData() {
