@@ -81,7 +81,7 @@
         methods: {
           async _refreshSensorData() {
             try {
-              const response = await fetch('/api');
+              const response = await fetch('/api/fruits');
               if (!response.ok) {
                 console.error('Error fetching data:', response.statusText);
                 return;
