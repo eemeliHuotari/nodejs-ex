@@ -46,7 +46,8 @@
       <h3>Data</h3>
       <p id="popupText">This is the marker's info text!</p>
       <div id="popup_content">
-        <div class="row" id="coordinatesTuple">Coordinates: </div>
+        <div class="row" id="longitude">Longitude: </div>
+        <div class="row" id="latitude">Latitude: </div>
         <div class="row" id="speed">Speed: </div>
         <div class="row" id="signalstrength">
           Signal Strength: 
@@ -58,7 +59,7 @@
   </section>
 
   <script>
-    const images = ["Icons/signal_empty.png", "Icons/signal_1.png", "Icons/signal_2.png", "Icons/signal_3.png", "Icons/signal_4.png"];
+    const images = ["nodejs-ex/Icons/signal_empty.png", "nodejs-ex/Icons/signal_1.png", "nodejs-ex/Icons/signal_2.png", "nodejs-ex/Icons/signal_3.png", "Icons/signal_4.png"];
     let currentImageIndex = 0;
     function changeImage() {
       document.getElementById("signalImage").src = images[currentImageIndex];
@@ -70,7 +71,8 @@
     mainRead();
     async function mainRead() {
       const coordinates = await getData();
-      document.getElementById('coordinatesTuple').textContent = `Coordinates: ${coordinates.coordinates[0]}, ${coordinates.coordinates[1]}`;
+      document.getElementById('longitude').textContent = `Longitude: ${coordinates.longitude}`
+      document.getElementById('latitude').textContent = `Latitude: ${coordinates.latitude}`
       document.getElementById('speed').textContent = `Speed: ${coordinates.speed}`
       document.getElementById('signalText').textContent = `${coordinates.signalStrength}`
       var map = new ol.Map({
@@ -81,13 +83,13 @@
         })
       ],
       view: new ol.View({
-        center: ol.proj.fromLonLat([coordinates.coordinates[0], coordinates.coordinates[1]]),
+        center: ol.proj.fromLonLat([coordinates.longitude, coordinates.latitude]),
         zoom: 14,
         maxZoom: 20
       })
     });
        var marker = new ol.Feature({
-        geometry: new ol.geom.Point(ol.proj.fromLonLat([coordinates.coordinates[0], coordinates.coordinates[1]])),
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([coordinates.longitude, coordinates.latitude])),
         info: {
           title: "Home",
           description: document.getElementById(popup_content),
