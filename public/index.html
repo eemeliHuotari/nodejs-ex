@@ -1,99 +1,75 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Sensor Data Display</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"
-    />
-    <style>
-      input[type='number'] {
-        width: 100%;
-        padding: 12px 20px;
-        margin: 8px 0;
-        display: inline-block;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-        -webkit-transition: 0.5s;
-        transition: 0.5s;
-        outline: 0;
-        font-family: 'Open Sans', serif;
-      }
-      .data-table {
-        margin-top: 20px;
-      }
-      .data-table th, .data-table td {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container" id="app">
-      <h1>Sensor Data</h1>
-      <p>
-        This application demonstrates how to query InfluxDB and display
-        sensor data like <em>signal strength</em>, <em>longitude</em>, <em>latitude</em>, and <em>speed</em>.
-      </p>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensor Data</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css" />
+  <style>
+    /* Some basic styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sensor Data</h1>
+  <p>This table displays sensor data including signal strength, longitude, latitude, and speed.</p>
+  
+  <table id="sensorDataTable">
+    <thead>
+      <tr>
+        <th>Signal Strength</th>
+        <th>Longitude</th>
+        <th>Latitude</th>
+        <th>Speed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Data rows will be dynamically inserted here -->
+    </tbody>
+  </table>
 
-      <h3>Sensor Data Table</h3>
-
-      <div class="data-table">
-        <table id="sensorDataTable">
-          <thead>
-            <tr>
-              <th>Signal Strength</th>
-              <th>Longitude</th>
-              <th>Latitude</th>
-              <th>Speed</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Data rows will be dynamically inserted here -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <script>
-      async function fetchSensorData() {
-        try {
-          const response = await fetch('/fruits');
-          if (response.ok) {
-            const data = await response.json();
-            displaySensorData(data);
-          } else {
-            console.error('Failed to fetch data:', response.statusText);
-          }
-        } catch (error) {
-          console.error('Error fetching data:', error);
+  <script>
+    async function fetchSensorData() {
+      try {
+        const response = await fetch('/fruits');
+        if (response.ok) {
+          const data = await response.json();
+          displaySensorData(data);
+        } else {
+          console.error('Failed to fetch data:', response.statusText);
         }
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
+    }
 
-     
-      function displaySensorData(data) {
-        const tableBody = document.querySelector('#sensorDataTable tbody');
-        tableBody.innerHTML = '';
+    function displaySensorData(data) {
+      const tableBody = document.querySelector('#sensorDataTable tbody');
+      tableBody.innerHTML = '';
 
-      
-        data.forEach((item) => {
-          const row = document.createElement('tr');
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.signal_strength}</td>
+          <td>${item.longitude}</td>
+          <td>${item.latitude}</td>
+          <td>${item.speed}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
 
-         
-          row.innerHTML = `
-            <td>${item.signal_strength}</td>
-            <td>${item.longitude}</td>
-            <td>${item.latitude}</td>
-            <td>${item.speed}</td>
-          `;
-
-          
-          tableBody.appendChild(row);
-        });
-      }
-      window.onload = fetchSensorData;
-    </script>
-  </body>
+    window.onload = fetchSensorData;
+  </script>
+</body>
 </html>
